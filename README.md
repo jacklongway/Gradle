@@ -64,7 +64,9 @@
 ## 下载
 - [下载](https://github.com/jackwaylong/Gradle/archive/master.zip)
 
+记得扫描下面的二维码,加我微信,一起交流学习哦!
 
+![bar](https://jackwaylong.github.io/silentor/img/bar.JPG)
 
 
 
