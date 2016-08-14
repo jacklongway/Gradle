@@ -1,0 +1,105 @@
+//打包生成jar
+task makeJar(type: Jar) {
+    println("start generate jar....")
+    //指定生成的jar名
+    baseName project.name
+    appendix 'release'
+    //version android.defaultConfig.versionName
+    classifier 'stable'
+    //从哪里打包class文件,可以指定文件和目录
+    String packageName = getPackageName()
+    packageName = packageName.replace(".", "/")
+    println("packagePath:" + packageName)
+    from(project.projectDir.getAbsolutePath() + "/build/intermediates/classes/release/" + packageName)
+    //打包到jar后的目录结构
+    into(packageName)
+    //去掉不需要打包的目录和文件
+    //去掉R$开头的文件
+    exclude {
+        it.name.startsWith('R');
+    }
+    println("end generate jar....")
+}
+
+/*task copySo(type: Copy) {
+    println("copy so...")
+    from project.buildDir.absolutePath + "/intermediates/jniLibs/release"
+    def nativeLib = new File(gradle.nativeLib);
+    if (!nativeLib.exists()) {
+        nativeLib.mkdirs();
+    }
+    println(nativeLib)
+    into nativeLib
+}*/
+//makeJar.dependsOn(build)
+
+clean.dependsOn('cleanTask')
+
+// hook generate jar
+assemble.dependsOn(makeJar)
+
+
+
+task cleanTask << {
+    cleanOutput(true)
+}
+
+task generateProjectProperties(type: Exec) {
+    def rootPath = project.getRootProject().getRootDir().absolutePath;
+    workingDir rootPath
+    def os = System.getProperty("os.name", "mac").toLowerCase()
+    if (os.startsWith("windows")) {
+        //on windows:
+        commandLine 'cmd', '/c', 'python properties.py'
+    } else {
+        //on linux
+        commandLine './properties.py'
+    }
+    //store the output instead of printing to the console:
+    standardOutput = new ByteArrayOutputStream()
+
+    //extension method generateProjectProperties.output() can be used to obtain the output:
+    ext.output = {
+        return standardOutput.toString()
+    }
+}
+
+tasks.getByName("assemble") {
+    it.doLast {
+        println "$project.name: After assemble, jar libs are copied to local repository"
+        project.ext.versionName = android.defaultConfig.versionName
+        println "\t versionName = $versionName"
+        project.copyOutput(true)
+    }
+}
+
+
+project.afterEvaluate {
+    if (!gradle.debug) {
+        println("disableDebugBuild")
+        disableDebugBuild()
+    }
+}
+
+task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+    if (project.gradle.ndkDir == null) //看看有没有指定 ndk.dir 路径 println "CANNOT Build NDK"
+        println "CANNOT Build NDK"
+    else {
+        def jni = file('jni');
+        println(jni)
+        if (!jni.exists()) {
+            println("jni not exist")
+            return
+        }
+        commandLine "${project.gradle.ndkDir}" + File.separator + "ndk-build",
+                '-C', jni.absolutePath,
+                '-j', Runtime.runtime.availableProcessors(), 'all', 'NDK_DEBUG=0'
+    }
+}
+tasks.withType(JavaCompile) { compileTask ->
+    // 满足条件执行,否则执行失败
+    if (project.gradle.ndkDir == null || !file('jni').exists()) {
+        return
+    }
+    compileTask.dependsOn buildNative
+}

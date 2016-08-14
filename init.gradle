@@ -1,0 +1,132 @@
+def initProjectEnvironment() {
+    generateProjectProperties()
+    println "initialize  Gradle Environment ....."
+    String separator = System.getProperty("file.separator")
+    Properties properties = new Properties()
+    File propertyFile = new File(rootDir.getAbsolutePath() + separator + "project.properties")
+    properties.load(propertyFile.newDataInputStream())
+/*
+根据 Project、Gradle 生命周期的介绍,settings 对象的创建位于具体 Project 创建之前 而 Gradle 底对象已经创建好了。所以,我们把 local.properties 的信息读出来后,通过 extra 属性的方式设置到 gradle 对象中
+而具体 Project 在执行的时候,就可以直接从 gradle 对象中得到这些属性了!
+*/
+    gradle.ext.minSdkVersion = properties.getProperty('minSdkVersion').toInteger().intValue()
+    gradle.ext.targetSdkVersion = properties.getProperty('targetSdkVersion').toInteger().intValue()
+    Properties localProperties = new Properties();
+    File localFile = new File(rootDir.getAbsolutePath() + separator + "local.properties")
+    localProperties.load(localFile.newDataInputStream())
+    gradle.ext.sdkDir = localProperties.getProperty('sdk.dir', java.lang.System.getenv("ANDROID_HOME"))
+    gradle.ext.ndkDir = localProperties.getProperty('ndk.dir', java.lang.System.getenv("NDK_HOME"))
+    String defaultDir = System.getProperty("user.home")
+    println("defaultDir:" + defaultDir)
+    String localDir = properties.getProperty('local.dir');
+    println("localDir:" + localDir)
+    if (localDir == null || localDir.isEmpty()) {
+        localDir = defaultDir + separator + "artifact" + separator + "local";
+    }
+    gradle.ext.localDir = localDir;
+    String apps = properties.getProperty("apps");
+    println("apps:" + apps)
+    if (apps == null || apps.isEmpty()) {
+        apps = defaultDir + separator + "artifact" + separator + "apps";
+    }
+    gradle.ext.apps = apps
+    String javaLib = properties.getProperty("javaLib");
+    println("javaLib:" + javaLib)
+    if (javaLib == null || javaLib.isEmpty()) {
+        javaLib = defaultDir + separator + "artifact" + separator + "javaLib";
+    }
+    gradle.ext.javaLib = javaLib;
+    String aar = properties.getProperty("aar");
+    println("aar:" + aar)
+    if (aar == null || aar.isEmpty()) {
+        aar = defaultDir + separator + "artifact" + separator + "aar";
+    }
+    gradle.ext.aar = aar;
+    String nativeLib = properties.getProperty("nativeLib");
+    println("nativeLib:" + nativeLib)
+    if (nativeLib == null || nativeLib.isEmpty()) {
+        nativeLib = defaultDir + separator + "artifact" + separator + "nativeLib";
+    }
+    gradle.ext.nativeLib = nativeLib;
+    gradle.ext.debug = Boolean.parseBoolean(properties.getProperty("debug", "true"))
+    gradle.ext.compileSdkVersion = properties.getProperty('compileSdkVersion').toInteger().intValue()
+    gradle.ext.buildToolsVersion = properties.getProperty('buildToolsVersion')
+    gradle.ext.debugStorePassword = properties.getProperty("debug.storePassword")
+    gradle.ext.debugKeyAlias = properties.getProperty("debug.keyAlias")
+    gradle.ext.debugKeyPassword = properties.getProperty("debug.keyPassword")
+    gradle.ext.releaseStorePassword = properties.getProperty("release.storePassword")
+    gradle.ext.releaseKeyAlias = properties.getProperty("release.keyAlias")
+    gradle.ext.releaseKeyPassword = properties.getProperty("release.keyPassword")
+//指定 debug keystore 文件的位置,debug 版 apk 签名的时候会用到
+    gradle.ext.debugKeystore = properties.getProperty('debug.keystore')
+    gradle.ext.releaseKeystore = properties.getProperty("release.keystore")
+    println "initialize  Gradle Environment completes..."
+}
+
+initProjectEnvironment()
+
+def consumeBuffer(Process p) {
+    final InputStream is1 = p.getInputStream();
+    new Thread(new Runnable() {
+        public void run() {
+            BufferedReader br = new BufferedReader(new InputStreamReader(is1));
+            try {
+                while (br.readLine() != null);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+
+            }
+        }
+
+    }).start(); // 启动单独的线程来清空p.getInputStream()的缓冲区
+
+    InputStream is2 = p.getErrorStream();
+
+    BufferedReader br2 = new BufferedReader(new InputStreamReader(is2));
+
+    StringBuilder buf = new StringBuilder(); // 保存输出结果流
+
+    String line = null;
+
+    while ((line = br2.readLine()) != null) buf.append(line); //
+
+    System.out.println("输出结果为：" + buf);
+}
+
+def generateProjectProperties() {
+    println "check project rootDir project.properties"
+    def rootPath = getRootDir().absolutePath;
+    def path = rootPath + File.separator + "project.properties"
+    def file = new File(path)
+    if (!file.exists()) {
+        println("generate project template......")
+        def os = System.getProperty("os.name", "mac").toLowerCase()
+        def cmd = "python " + rootPath + File.separator + "properties.py"
+        def exec;
+        Runtime runtime = Runtime.getRuntime();
+        def isWindow
+        if (os.startsWith("windows")) {
+            exec = "cmd.exe /c " + cmd;
+            isWindow = true;
+        } else {
+            exec = cmd
+            isWindow = false
+        }
+        Process process = runtime.exec(exec);
+        if (isWindow) {
+            consumeBuffer(process)
+        }
+        def start = System.currentTimeMillis();
+        int value = process.waitFor();
+        def end = System.currentTimeMillis();
+        println("consume time:" + (end - start) + "ms")
+        if (value == 0) {
+            println("exit success.")
+        } else {
+            println("exit fail:" + value)
+        }
+    }
+}
+
+initProjectEnvironment()

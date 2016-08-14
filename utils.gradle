@@ -1,0 +1,190 @@
+def copyFile(String src, String des) {
+    // 拷贝文件
+    def s = new File(src)
+    if (!s.exists()) {
+        return
+    }
+    def d = new File(des)
+    if (d.exists()) {
+        rmFile(des)
+    } else {
+        d.createNewFile()
+    }
+    d.withDataOutputStream { os ->
+        s.withDataInputStream { is ->
+            os << is
+        }
+    }
+}
+
+def isEmpty(String src) {
+    if (src == null || src.length() == 0) {
+        return true
+    }
+    return false
+}
+
+def rmFile(String src) {
+    // 删除文件
+    def file = new File(src)
+    if (!file.exists()) {
+        return
+    }
+    if (file.isDirectory()) {
+        file.deleteDir()
+    } else {
+        file.delete()
+    }
+}
+
+def cleanOutput(boolean output = true) {
+    // 清除输出
+    if (output) {
+        println "cleanOutput..."
+    }
+}
+
+def copyOutput(boolean output = true) {
+    // 拷贝输出
+    println("copyOutput...")
+    if (output) {
+        copyOutputAAR(output)
+        copyOutputAPK(output)
+        copyOutputJAR(output)
+        copyOutputSO(output)
+    }
+}
+
+
+def copy(String product, String des,
+         final boolean filter = false, final String filterSuffix = null) {
+    if (product == null || product.isEmpty()) {
+        println("product==null")
+        return false
+    }
+    def s = new File(product)
+    if (!s.exists()) {
+        println("product not exists")
+        return false;
+    }
+    def d = new File(des)
+    if (d.exists() && !d.isDirectory()) {
+        return false
+    }
+    if (!d.exists()) {
+        d.mkdirs()
+    }
+    println("product:" + product + ",des:" + des)
+    s.listFiles(new FilenameFilter() {
+        @Override
+        boolean accept(File dir, String name) {
+            if (filter) {
+                return !name.endsWith(filterSuffix)
+            }
+            return true
+        }
+    }).each {
+        def path = it.absolutePath;
+        def desPath = d.absolutePath;
+        def name = it.name
+        println("path:" + path + ",desPath:" + desPath + ",name:" + name)
+        if (it.isDirectory()) {
+            copy(path, desPath + "/" + name)
+        } else {
+            def index = name.lastIndexOf(".");
+            String versionName = project.versionName
+            if (isEmpty(versionName)) {
+                versionName = getVersionName();
+            }
+            name = name.substring(0, index).concat("-").concat(versionName).concat(name.substring(index))
+            copyFile(path, desPath + "/" + name)
+        }
+    }
+}
+
+def copyOutputAAR(boolean bAAR = true) {
+    if (bAAR) {
+        def destination = gradle.aar + "/" + project.name;
+        def product = new File(getBuildDir(), "outputs/aar").getAbsolutePath()
+        copy(product, destination)
+    }
+}
+
+
+def copyOutputAPK(boolean bAPK = true) {
+    if (bAPK) {
+        def destination = gradle.apps + "/" + project.name;
+        def product = new File(getBuildDir(), "outputs/apk").getAbsolutePath()
+        copy(product, destination)
+    }
+}
+
+def copyOutputJAR(boolean bJar = true) {
+    if (bJar) {
+        def destination = gradle.javaLib + "/" + project.name;
+        def product = new File(getBuildDir(), "libs").getAbsolutePath()
+        copy(product, destination)
+    }
+}
+
+def copyOutputSO(boolean bSO = true) {
+    if (bSO) {
+        def destination = gradle.nativeLib + "/" + project.name;
+        def product = new File(project.getProjectDir(), "libs").getAbsolutePath()
+        copy(product, destination, true, ".jar")
+    }
+}
+
+
+def getVersionName() {
+    // 获取版本名
+    def androidManifest = new XmlSlurper().parse(project.projectDir.getAbsolutePath() + "/src/main/AndroidManifest.xml")
+    def versionName = androidManifest.@'android:versionName';
+    println versionName
+    return versionName
+}
+
+def getPackageName() {
+    // 获取版本名
+    def androidManifest = new XmlSlurper().parse(project.projectDir.getAbsolutePath() + "/src/main/AndroidManifest.xml")
+    def packageName = androidManifest.@'package';
+    println packageName
+    return packageName
+}
+
+def getOSName() {
+    def osName = System.getProperty("os.name", "Mac")
+    println("os:" + osName)
+    return osName
+}
+
+
+def disableDebugBuild() {
+    // 注意增量编译导致以前文件不会删除
+    def tasks = project.tasks.findAll { task ->
+        task.name.contains("debug") || task.name.contains("Debug")
+    }
+
+    tasks.each {
+        println "disable task debug: $it.name"
+        it.enabled false
+    }
+}
+
+
+ext {
+    copyFile = this.&copyFile
+    rmFile = this.&rmFile
+    cleanOutput = this.&cleanOutput
+    copyOutput = this.&copyOutput
+    copy = this.&copy
+    copyOutputAAR = this.&copyOutputAAR
+    copyOutputAPK = this.&copyOutputAPK
+    copyOutputJAR = this.&copyOutputJAR
+    copyOutputSO = this.&copyOutputSO
+    getVersionName = this.&getVersionName
+    getPackageName = this.&getPackageName
+    disableDebugBuild = this.&disableDebugBuild
+    isEmpty = this.&isEmpty
+    getOSName = this.&getOSName
+}
