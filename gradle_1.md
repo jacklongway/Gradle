@@ -1,5 +1,5 @@
 # 揭开Gradle的神秘面纱
-![gradle｜center](https://jackwaylong.github.io/silentor/img/xmind/gradle.jpg)
+![gradle｜center](../../../img/xmind/gradle.jpg)
 
 > gradle前言
  
@@ -29,23 +29,23 @@
 ## gradle工程构建流
 > as gradle工程构建流图示
 
-![gradle](https://jackwaylong.github.io/silentor/img/xmind/gradle.png)
+![gradle](../../../img/xmind/gradle.png)
 
-![aar](https://jackwaylong.github.io/silentor/img/xmind/aar.png)
+![aar](../../../img/xmind/aar.png)
 
 ## gradle实战
 > 构建脚本集
 
-1. [settings.gradle]
-2. [root build.gradle]
-3. [init.gradle]
-4. [utils.gradle]
-5. [tasks.gradle]
-6. [submodle build.gradle]
-7. [common.properties]
-8. [template/project.properties]
-9. [publish.bat/publish.sh]
-10. [properties]
+1. [settings.gradle](./settings.md)
+2. [root build.gradle](./root_build.md)
+3. [init.gradle](./init.md)
+4. [utils.gradle](./utils.md)
+5. [tasks.gradle](./tasks.md)
+6. [submodle build.gradle](./submodule.md)
+7. [common.properties](./common.md)
+8. [template/project.properties](./template.md)
+9. [publish.bat/publish.sh](./publish.md)
+10. [properties](./properties.md)
 
 ## 总结
 > 到此gradle基本构建流已经说完了,这些只是构建的开始,后面我还会继续深入gradle在组件化开发中的作用以及强大支撑，只有明白了gradle的基本工作原理，我们才能更好的去灵活运用gradle来拆分我们的工程，很好的解耦我们的工程，目前比较的多的开发模式有组件化，插件化，我个人理解gradle就是开发模式的驱动者，学好gradle才是根本，才能很好的进行模式开发，gradle网上的指导资料很少，基本都是一些用法，没有分析原理的，对于技术者我强烈建议学习一门技术还是去对应的官网，这样不仅仅能系统的学习，并且还能更为深入的理解语言的本质。
@@ -62,9 +62,8 @@
 
 
 ## gradle项目地址
-- [下载](https://github.com/jackwaylong/Gradle/archive/master.zip)
-- [github查看](https://github.com/jackwaylong/Gradle)
-
+- [下载](https://github.com/jackwaylong/LiteXml/archive/master.zip)
+- [github查看](https://github.com/jackwaylong/LiteXml)
 
 
 
