@@ -61,9 +61,8 @@
 4. 基于gradle构建项目到产品输出闭环
 
 
-## gradle项目地址
+## 下载
 - [下载](https://github.com/jackwaylong/Gradle/archive/master.zip)
-- [github查看](https://github.com/jackwaylong/Gradle)
 
 
 
