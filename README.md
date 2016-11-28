@@ -1,5 +1,5 @@
 # 揭开Gradle的神秘面纱
-![gradle｜center](https://jackwaylong.github.io/silentor/img/xmind/gradle.jpg)
+![gradle｜center](https://www.processon.com/chart_image/583c622fe4b0e742e43f7055.png)
 
 > gradle前言
  
@@ -29,9 +29,9 @@
 ## gradle工程构建流
 > as gradle工程构建流图示
 
-![gradle](https://jackwaylong.github.io/silentor/img/xmind/gradle.png)
+![gradle](https://www.processon.com/chart_image/582570bce4b0fa6ffba35f85.png)
 
-![aar](https://jackwaylong.github.io/silentor/img/xmind/aar.png)
+![aar](https://www.processon.com/chart_image/58257525e4b00c4fc871d544.png)
 
 ## gradle实战
 > 构建脚本集

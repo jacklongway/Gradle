@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Gradle.iml" filepath="$PROJECT_DIR$/Gradle.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/testaardependencies/testaardependencies.iml" filepath="$PROJECT_DIR$/testaardependencies/testaardependencies.iml" />
     </modules>
   </component>
 </project>
